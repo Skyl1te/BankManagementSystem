@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct
@@ -9,18 +10,33 @@ typedef struct
     double balance;
 } Account;
 
+typedef enum {
+    DEPOSIT = 0,
+    WITHDRAW = 1,
+    TRANSFER = 2
+} TransactionType;
+
 typedef struct {
-    // int id;
-    double balance;
+    TransactionType type;
+
+    int senderID;
+    int receiverID;
+
+    double amount;
+
     char senderName[50];
     char receiverName[50];
+
 } Transaction;
 
-Account accounts[100];
-Transaction transactions[100];
+Account *accounts = NULL;
+Transaction *transactions = NULL;
 
-int accountCount = 0;
+int transactionsCapacity = 0;
 int transactionCount = 0;
+
+int accountsCapacity = 0;
+int accountCount = 0;
 int nextID = 1;
 
 void (*BankAction)(void);
@@ -38,12 +54,58 @@ int findAccountIndex(int id)
     return -1;
 }
 
+void CreateTransaction(TransactionType type, int senderIndex, int receiverIndex, double amount) {
+    if (transactionCount >= transactionsCapacity) {
+        int newTransactionsCapacity = 2 * transactionsCapacity;
+
+        Transaction *temp = realloc(transactions, newTransactionsCapacity * sizeof(Transaction));
+        if (temp == NULL) {
+            printf("Failed to expand transactions memory.\n");
+            return;
+        }
+
+        transactions = temp;
+        transactionsCapacity = newTransactionsCapacity;
+    }
+
+    Transaction transaction;
+
+    transaction.type = type;
+    transaction.amount = amount;
+    transaction.senderID = accounts[senderIndex].id;
+
+    strcpy(transaction.senderName, accounts[senderIndex].name);
+
+    if (receiverIndex != -1) {
+        transaction.receiverID = accounts[receiverIndex].id;
+        strcpy(transaction.receiverName, accounts[receiverIndex].name);
+    }
+    else {
+        transaction.receiverID = -1;
+        strcpy(transaction.receiverName, "-");
+    }
+
+    transactions[transactionCount] = transaction;
+    transactionCount++;
+}
+
 void createAccount(void)
 {
-    Account user;
+    if (accountCount >= accountsCapacity) {
+        int newAccountsCapacity = 2 * accountsCapacity;
 
-    user.id = nextID;
-    nextID++;
+        Account *temp = realloc(accounts, newAccountsCapacity * sizeof(Account));
+        if (temp == NULL) {
+            printf("Failed to expand accounts memory.\n");
+            return;
+        }
+
+        accounts = temp;
+        accountsCapacity = newAccountsCapacity;
+
+    }
+
+    Account user;
 
     printf("Enter name: ");
     scanf("%49s", user.name);
@@ -53,6 +115,14 @@ void createAccount(void)
 
     printf("Enter balance: ");
     scanf("%lf", &user.balance);
+
+    if (user.balance < 0) {
+        printf("Invalid balance.\n");
+        return;
+    }
+
+    user.id = nextID;
+    nextID++;
 
     accounts[accountCount] = user;
     accountCount++;
@@ -98,6 +168,8 @@ void Deposit(void)
 
     printf("Deposit successful.\n");
     printf("New balance: %.2f\n", accounts[index].balance);
+
+    CreateTransaction(DEPOSIT, index, -1, amount);
 }
 
 void Withdraw(void)
@@ -135,6 +207,9 @@ void Withdraw(void)
 
     printf("Withdraw successful.\n");
     printf("New balance: %.2f\n", accounts[index].balance);
+
+    CreateTransaction(WITHDRAW, index, -1, amount);
+
 }
 
 void CreateTransfer(void)
@@ -199,14 +274,8 @@ void CreateTransfer(void)
         accounts[receiverIndex].balance
     );
 
-    Transaction transaction;
+    CreateTransaction(TRANSFER, senderIndex, receiverIndex, amount);
 
-    strcpy(transaction.senderName, accounts[senderIndex].name);
-    strcpy(transaction.receiverName, accounts[receiverIndex].name);
-    transaction.balance = amount;
-
-    transactions[transactionCount] = transaction;
-    transactionCount++;
 }
 
 void ShowAccount(void)
@@ -216,6 +285,11 @@ void ShowAccount(void)
     scanf("%d", &id);
 
     int index = findAccountIndex(id);
+
+    if (index == -1) {
+        printf("Account not found.\n");
+        return;
+    }
 
     printf(
             "ID: %d, Name: %s, Surname: %s, Balance: %.2f\n",
@@ -267,27 +341,55 @@ void ShowTransactionsHistory(void)
 {
     for (int i = 0; i < transactionCount; i++)
     {
-        printf("%s sent %.2lf to %s\n", transactions[i].senderName,
-            transactions[i].balance,
-            transactions[i].receiverName);
+        if (transactions[i].type == DEPOSIT)
+        {
+            printf(
+                "DEPOSIT: %s (ID %d) deposited %.2f\n",
+                transactions[i].senderName,
+                transactions[i].senderID,
+                transactions[i].amount
+            );
+        }
+        else if (transactions[i].type == WITHDRAW)
+        {
+            printf(
+                "WITHDRAW: %s (ID %d) withdrew %.2f\n",
+                transactions[i].senderName,
+                transactions[i].senderID,
+                transactions[i].amount
+            );
+        }
+        else if (transactions[i].type == TRANSFER)
+        {
+            printf(
+                "TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
+                transactions[i].senderName,
+                transactions[i].senderID,
+                transactions[i].amount,
+                transactions[i].receiverName,
+                transactions[i].receiverID
+            );
+        }
     }
 }
 
 int main(void)
 {
 
-    Account u1 = {1, "user1", "surname1", 3214.23};
-    Account u2 = {2, "user2", "surname2", 1423};
-    Account u3 = {3, "user3", "surname3", 32};
-    Account u4 = {4, "user4", "surname4", 14.23};
+    accountsCapacity = 10;
+    transactionsCapacity = 10;
 
-    accounts[0] = u1;
-    accounts[1] = u2;
-    accounts[2] = u3;
-    accounts[3] = u4;
+    accounts = malloc(accountsCapacity * sizeof(Account));
+    transactions = malloc(transactionsCapacity * sizeof(Transaction));
+    if (accounts == NULL || transactions == NULL)
+    {
+        printf("Memory allocation failed.\n");
 
-    accountCount = 4;
-    nextID = 5;
+        free(accounts);
+        free(transactions);
+
+        return 1;
+    }
 
     do
     {
@@ -368,6 +470,8 @@ int main(void)
             case 0:
             {
                 printf("Goodbye!\n");
+                free(accounts);
+                free(transactions);
                 return 0;
             }
 
@@ -379,6 +483,4 @@ int main(void)
         }
 
     } while (1);
-
-    return 0;
 }
