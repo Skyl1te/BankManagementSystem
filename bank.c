@@ -8,6 +8,7 @@
 
 #include "bank.h"
 
+
 Account *accounts = NULL;
 Transaction *transactions = NULL;
 
@@ -18,6 +19,8 @@ int nextID = 1;
 int transactionsCapacity = 0;
 int transactionCount = 0;
 
+
+/* Input helpers */
 
 int ReadInt(const char *message)
 {
@@ -65,6 +68,73 @@ void ReadString(const char *message, char value[50])
 }
 
 
+/* Memory management */
+
+int ResizeAccounts(void)
+{
+    int newCapacity;
+
+    if (accountsCapacity == 0)
+    {
+        newCapacity = 10;
+    }
+    else
+    {
+        newCapacity = accountsCapacity * 2;
+    }
+
+    Account *temp = realloc(
+        accounts,
+        newCapacity * sizeof(Account)
+    );
+
+    if (temp == NULL)
+    {
+        printf("Failed to expand accounts memory.\n");
+        return 0;
+    }
+
+    accounts = temp;
+    accountsCapacity = newCapacity;
+
+    return 1;
+}
+
+
+int ResizeTransactions(void)
+{
+    int newCapacity;
+
+    if (transactionsCapacity == 0)
+    {
+        newCapacity = 10;
+    }
+    else
+    {
+        newCapacity = transactionsCapacity * 2;
+    }
+
+    Transaction *temp = realloc(
+        transactions,
+        newCapacity * sizeof(Transaction)
+    );
+
+    if (temp == NULL)
+    {
+        printf("Failed to expand transactions memory.\n");
+        return 0;
+    }
+
+    transactions = temp;
+    transactionsCapacity = newCapacity;
+
+    return 1;
+}
+
+
+/* Account helpers */
+
+/* Returns the index of the account, or -1 if it does not exist. */
 int findAccountIndex(int id)
 {
     for (int i = 0; i < accountCount; i++)
@@ -78,17 +148,25 @@ int findAccountIndex(int id)
     return -1;
 }
 
+
+/* Returns true if the account is active. */
 bool CheckAccountStatus(int accountIndex)
 {
     if (!accounts[accountIndex].status)
     {
-        printf("Account %d is closed.\n",accounts[accountIndex].id);
+        printf(
+            "Account %d is closed.\n",
+            accounts[accountIndex].id
+        );
 
         return false;
     }
 
     return true;
 }
+
+
+/* Transaction operations */
 
 void CreateTransaction(
     TransactionType type,
@@ -99,21 +177,10 @@ void CreateTransaction(
 {
     if (transactionCount >= transactionsCapacity)
     {
-        int newTransactionsCapacity = transactionsCapacity * 2;
-
-        Transaction *temp = realloc(
-            transactions,
-            newTransactionsCapacity * sizeof(Transaction)
-        );
-
-        if (temp == NULL)
+        if (!ResizeTransactions())
         {
-            printf("Failed to expand transactions memory.\n");
             return;
         }
-
-        transactions = temp;
-        transactionsCapacity = newTransactionsCapacity;
     }
 
     Transaction transaction;
@@ -152,25 +219,16 @@ void CreateTransaction(
 }
 
 
+/* Account operations */
+
 void CreateAccount(void)
 {
     if (accountCount >= accountsCapacity)
     {
-        int newAccountsCapacity = accountsCapacity * 2;
-
-        Account *temp = realloc(
-            accounts,
-            newAccountsCapacity * sizeof(Account)
-        );
-
-        if (temp == NULL)
+        if (!ResizeAccounts())
         {
-            printf("Failed to expand accounts memory.\n");
             return;
         }
-
-        accounts = temp;
-        accountsCapacity = newAccountsCapacity;
     }
 
     Account user;
@@ -188,6 +246,7 @@ void CreateAccount(void)
 
     user.id = nextID;
     user.status = true;
+
     nextID++;
 
     accounts[accountCount] = user;
@@ -197,7 +256,7 @@ void CreateAccount(void)
     printf("Account ID: %d\n", user.id);
 
     printf(
-        "ID: %d, Name: %s, Surname: %s, Balance: %.2f\n",
+        "ID: %d, Name: %s, Surname: %s, Balance: %.2f, Status: ACTIVE\n",
         user.id,
         user.name,
         user.surname,
@@ -208,7 +267,6 @@ void CreateAccount(void)
 
 void Deposit(void)
 {
-
     int id = ReadInt("Enter account ID");
 
     int index = findAccountIndex(id);
@@ -219,7 +277,8 @@ void Deposit(void)
         return;
     }
 
-    if (!CheckAccountStatus(index)) {
+    if (!CheckAccountStatus(index))
+    {
         return;
     }
 
@@ -257,7 +316,8 @@ void Withdraw(void)
         return;
     }
 
-    if (!CheckAccountStatus(index)) {
+    if (!CheckAccountStatus(index))
+    {
         return;
     }
 
@@ -289,7 +349,6 @@ void Withdraw(void)
 }
 
 
-
 void CreateTransfer(void)
 {
     int senderID = ReadInt("Sender ID");
@@ -309,20 +368,22 @@ void CreateTransfer(void)
         printf("Invalid sender ID.\n");
         return;
     }
-    if (!CheckAccountStatus(senderIndex)) {
+
+    if (!CheckAccountStatus(senderIndex))
+    {
         return;
     }
-
 
     if (receiverIndex == -1)
     {
         printf("Invalid receiver ID.\n");
         return;
     }
-    if (!CheckAccountStatus(receiverIndex)) {
+
+    if (!CheckAccountStatus(receiverIndex))
+    {
         return;
     }
-
 
     double amount = ReadDouble("Enter the amount to send");
 
@@ -360,6 +421,7 @@ void CreateTransfer(void)
         amount
     );
 }
+
 
 void ShowAccount(void)
 {
@@ -410,7 +472,9 @@ void ListAccounts(void)
 
 void DeleteAccount(void)
 {
-    int id = ReadInt("Enter ID of the account you want to delete");
+    int id = ReadInt(
+        "Enter ID of the account you want to delete"
+    );
 
     int index = findAccountIndex(id);
 
@@ -430,8 +494,13 @@ void DeleteAccount(void)
     printf("Account deleted successfully.\n");
 }
 
-void CloseAccount(void) {
-    int id = ReadInt("Enter ID of the account you want to close");
+
+void CloseAccount(void)
+{
+    int id = ReadInt(
+        "Enter ID of the account you want to close"
+    );
+
     int index = findAccountIndex(id);
 
     if (index == -1)
@@ -451,8 +520,13 @@ void CloseAccount(void) {
     printf("Account closed successfully.\n");
 }
 
-void OpenAccount(void) {
-    int id = ReadInt("Enter ID of the account you want to open");
+
+void OpenAccount(void)
+{
+    int id = ReadInt(
+        "Enter ID of the account you want to open"
+    );
+
     int index = findAccountIndex(id);
 
     if (index == -1)
@@ -471,6 +545,9 @@ void OpenAccount(void) {
 
     printf("Account opened successfully.\n");
 }
+
+
+/* Transaction history */
 
 void ShowTransactionsHistory(void)
 {

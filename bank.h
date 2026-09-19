@@ -33,8 +33,10 @@ typedef struct
 
     char senderName[50];
     char receiverName[50];
-
 } Transaction;
+
+
+/* Global variables */
 
 extern Account *accounts;
 extern Transaction *transactions;
@@ -46,11 +48,42 @@ extern int nextID;
 extern int transactionsCapacity;
 extern int transactionCount;
 
+
+/* Input */
+
 int ReadInt(const char *message);
 double ReadDouble(const char *message);
 void ReadString(const char *message, char value[50]);
 
+
+/* Memory */
+
+int ResizeAccounts(void);
+int ResizeTransactions(void);
+
+
+/* Account helpers */
+
 int findAccountIndex(int id);
+bool CheckAccountStatus(int accountIndex);
+
+
+/* Account functions */
+
+void CreateAccount(void);
+void Deposit(void);
+void Withdraw(void);
+void CreateTransfer(void);
+
+void ShowAccount(void);
+void ListAccounts(void);
+
+void DeleteAccount(void);
+void CloseAccount(void);
+void OpenAccount(void);
+
+
+/* Transactions */
 
 void CreateTransaction(
     TransactionType type,
@@ -59,16 +92,6 @@ void CreateTransaction(
     double amount
 );
 
-void CreateAccount(void);
-void Deposit(void);
-void Withdraw(void);
-void CreateTransfer(void);
-void ShowAccount(void);
-void ListAccounts(void);
-void DeleteAccount(void);
-void CloseAccount(void);
-void OpenAccount(void);
-bool CheckAccountStatus(int accountIndex);
 void ShowTransactionsHistory(void);
 
 #endif //BANKMANAGEMENTSYSTEM_BANK_H
