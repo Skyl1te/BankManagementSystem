@@ -82,6 +82,7 @@ void DeleteAccount(void);
 void CloseAccount(void);
 void OpenAccount(void);
 
+void EditAccount(void);
 
 /* Transactions */
 

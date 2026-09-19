@@ -264,6 +264,72 @@ void CreateAccount(void)
     );
 }
 
+void EditAccount(void)
+{
+    int id = ReadInt("Enter account ID you want to edit");
+    int index = findAccountIndex(id);
+
+    if (index == -1)
+    {
+        printf("Account not found.\n");
+        return;
+    }
+
+    int choice = ReadInt(
+        "What do you want to edit?\n"
+        "1. Name\n"
+        "2. Surname\n"
+        "3. Name and surname\n"
+        "Your choice"
+    );
+
+    switch (choice)
+    {
+        case 1:
+        {
+            ReadString(
+                "Enter new name",
+                accounts[index].name
+            );
+
+            printf("Name updated successfully.\n");
+            break;
+        }
+
+        case 2:
+        {
+            ReadString(
+                "Enter new surname",
+                accounts[index].surname
+            );
+
+            printf("Surname updated successfully.\n");
+            break;
+        }
+
+        case 3:
+        {
+            ReadString(
+                "Enter new name",
+                accounts[index].name
+            );
+
+            ReadString(
+                "Enter new surname",
+                accounts[index].surname
+            );
+
+            printf("Name and surname updated successfully.\n");
+            break;
+        }
+
+        default:
+        {
+            printf("Invalid option.\n");
+            break;
+        }
+    }
+}
 
 void Deposit(void)
 {

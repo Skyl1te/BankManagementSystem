@@ -42,6 +42,7 @@ int main(void)
         printf("8. Transaction history\n");
         printf("9. Close account\n");
         printf("10. Open account\n");
+        printf("11. Edit account\n");
         printf("0. Exit\n");
 
         int choice = ReadInt("Enter");
@@ -49,66 +50,97 @@ int main(void)
         switch (choice)
         {
             case 1:
+            {
                 BankAction = CreateAccount;
                 BankAction();
                 break;
+            }
 
             case 2:
+            {
                 BankAction = Deposit;
                 BankAction();
                 break;
+            }
 
             case 3:
+            {
                 BankAction = Withdraw;
                 BankAction();
                 break;
+            }
 
             case 4:
+            {
                 BankAction = CreateTransfer;
                 BankAction();
                 break;
+            }
 
             case 5:
+            {
                 BankAction = ShowAccount;
                 BankAction();
                 break;
+            }
 
             case 6:
+            {
                 BankAction = ListAccounts;
                 BankAction();
                 break;
+            }
 
             case 7:
+            {
                 BankAction = DeleteAccount;
                 BankAction();
                 break;
+            }
 
             case 8:
+            {
                 BankAction = ShowTransactionsHistory;
                 BankAction();
                 break;
+            }
 
             case 9:
+            {
                 BankAction = CloseAccount;
                 BankAction();
                 break;
+            }
 
             case 10:
+            {
                 BankAction = OpenAccount;
                 BankAction();
                 break;
+            }
+
+            case 11:
+            {
+                BankAction = EditAccount;
+                BankAction();
+                break;
+            }
 
             case 0:
+            {
                 printf("Goodbye!\n");
 
                 free(accounts);
                 free(transactions);
 
                 return 0;
+            }
 
             default:
+            {
                 printf("Invalid option.\n");
                 break;
+            }
         }
 
     } while (1);
