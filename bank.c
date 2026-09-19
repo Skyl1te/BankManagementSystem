@@ -19,6 +19,52 @@ int transactionsCapacity = 0;
 int transactionCount = 0;
 
 
+int ReadInt(const char *message)
+{
+    int value;
+
+    printf("%s: ", message);
+
+    while (scanf("%d", &value) != 1)
+    {
+        printf("Invalid input. Enter a number: ");
+
+        while (getchar() != '\n')
+        {
+        }
+    }
+
+    return value;
+}
+
+
+double ReadDouble(const char *message)
+{
+    double value;
+
+    printf("%s: ", message);
+
+    while (scanf("%lf", &value) != 1)
+    {
+        printf("Invalid input. Enter a number: ");
+
+        while (getchar() != '\n')
+        {
+        }
+    }
+
+    return value;
+}
+
+
+void ReadString(const char *message, char value[50])
+{
+    printf("%s: ", message);
+
+    scanf("%49s", value);
+}
+
+
 int findAccountIndex(int id)
 {
     for (int i = 0; i < accountCount; i++)
@@ -32,6 +78,17 @@ int findAccountIndex(int id)
     return -1;
 }
 
+bool CheckAccountStatus(int accountIndex)
+{
+    if (!accounts[accountIndex].status)
+    {
+        printf("Account %d is closed.\n",accounts[accountIndex].id);
+
+        return false;
+    }
+
+    return true;
+}
 
 void CreateTransaction(
     TransactionType type,
@@ -91,7 +148,6 @@ void CreateTransaction(
     }
 
     transactions[transactionCount] = transaction;
-
     transactionCount++;
 }
 
@@ -119,14 +175,10 @@ void CreateAccount(void)
 
     Account user;
 
-    printf("Enter name: ");
-    scanf("%49s", user.name);
+    ReadString("Enter name", user.name);
+    ReadString("Enter surname", user.surname);
 
-    printf("Enter surname: ");
-    scanf("%49s", user.surname);
-
-    printf("Enter balance: ");
-    scanf("%lf", &user.balance);
+    user.balance = ReadDouble("Enter balance");
 
     if (user.balance < 0)
     {
@@ -135,6 +187,7 @@ void CreateAccount(void)
     }
 
     user.id = nextID;
+    user.status = true;
     nextID++;
 
     accounts[accountCount] = user;
@@ -155,11 +208,8 @@ void CreateAccount(void)
 
 void Deposit(void)
 {
-    int id;
-    double amount;
 
-    printf("Enter account ID: ");
-    scanf("%d", &id);
+    int id = ReadInt("Enter account ID");
 
     int index = findAccountIndex(id);
 
@@ -169,8 +219,11 @@ void Deposit(void)
         return;
     }
 
-    printf("Enter amount: ");
-    scanf("%lf", &amount);
+    if (!CheckAccountStatus(index)) {
+        return;
+    }
+
+    double amount = ReadDouble("Enter amount");
 
     if (amount <= 0)
     {
@@ -194,11 +247,7 @@ void Deposit(void)
 
 void Withdraw(void)
 {
-    int id;
-    double amount;
-
-    printf("Enter account ID: ");
-    scanf("%d", &id);
+    int id = ReadInt("Enter account ID");
 
     int index = findAccountIndex(id);
 
@@ -208,8 +257,11 @@ void Withdraw(void)
         return;
     }
 
-    printf("Enter amount: ");
-    scanf("%lf", &amount);
+    if (!CheckAccountStatus(index)) {
+        return;
+    }
+
+    double amount = ReadDouble("Enter amount");
 
     if (amount <= 0)
     {
@@ -237,18 +289,11 @@ void Withdraw(void)
 }
 
 
+
 void CreateTransfer(void)
 {
-    int senderID;
-    int receiverID;
-
-    double amount;
-
-    printf("Sender ID: ");
-    scanf("%d", &senderID);
-
-    printf("Receiver ID: ");
-    scanf("%d", &receiverID);
+    int senderID = ReadInt("Sender ID");
+    int receiverID = ReadInt("Receiver ID");
 
     if (senderID == receiverID)
     {
@@ -264,15 +309,22 @@ void CreateTransfer(void)
         printf("Invalid sender ID.\n");
         return;
     }
+    if (!CheckAccountStatus(senderIndex)) {
+        return;
+    }
+
 
     if (receiverIndex == -1)
     {
         printf("Invalid receiver ID.\n");
         return;
     }
+    if (!CheckAccountStatus(receiverIndex)) {
+        return;
+    }
 
-    printf("Enter the amount to send: ");
-    scanf("%lf", &amount);
+
+    double amount = ReadDouble("Enter the amount to send");
 
     if (amount <= 0)
     {
@@ -309,13 +361,9 @@ void CreateTransfer(void)
     );
 }
 
-
 void ShowAccount(void)
 {
-    int id;
-
-    printf("Enter account ID: ");
-    scanf("%d", &id);
+    int id = ReadInt("Enter account ID");
 
     int index = findAccountIndex(id);
 
@@ -326,11 +374,12 @@ void ShowAccount(void)
     }
 
     printf(
-        "ID: %d, Name: %s, Surname: %s, Balance: %.2f\n",
+        "ID: %d, Name: %s, Surname: %s, Balance: %.2f, Status: %s\n",
         accounts[index].id,
         accounts[index].name,
         accounts[index].surname,
-        accounts[index].balance
+        accounts[index].balance,
+        accounts[index].status ? "ACTIVE" : "CLOSED"
     );
 }
 
@@ -348,11 +397,12 @@ void ListAccounts(void)
     for (int i = 0; i < accountCount; i++)
     {
         printf(
-            "ID: %d, Name: %s, Surname: %s, Balance: %.2f\n",
+            "ID: %d, Name: %s, Surname: %s, Balance: %.2f, Status: %s\n",
             accounts[i].id,
             accounts[i].name,
             accounts[i].surname,
-            accounts[i].balance
+            accounts[i].balance,
+            accounts[i].status ? "ACTIVE" : "CLOSED"
         );
     }
 }
@@ -360,10 +410,7 @@ void ListAccounts(void)
 
 void DeleteAccount(void)
 {
-    int id;
-
-    printf("Enter ID of the account you want to delete: ");
-    scanf("%d", &id);
+    int id = ReadInt("Enter ID of the account you want to delete");
 
     int index = findAccountIndex(id);
 
@@ -383,6 +430,47 @@ void DeleteAccount(void)
     printf("Account deleted successfully.\n");
 }
 
+void CloseAccount(void) {
+    int id = ReadInt("Enter ID of the account you want to close");
+    int index = findAccountIndex(id);
+
+    if (index == -1)
+    {
+        printf("Account not found.\n");
+        return;
+    }
+
+    if (!accounts[index].status)
+    {
+        printf("Account is already closed.\n");
+        return;
+    }
+
+    accounts[index].status = false;
+
+    printf("Account closed successfully.\n");
+}
+
+void OpenAccount(void) {
+    int id = ReadInt("Enter ID of the account you want to open");
+    int index = findAccountIndex(id);
+
+    if (index == -1)
+    {
+        printf("Account not found.\n");
+        return;
+    }
+
+    if (accounts[index].status)
+    {
+        printf("Account is already opened.\n");
+        return;
+    }
+
+    accounts[index].status = true;
+
+    printf("Account opened successfully.\n");
+}
 
 void ShowTransactionsHistory(void)
 {

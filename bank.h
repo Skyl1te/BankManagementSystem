@@ -2,8 +2,9 @@
 // Created by LOQ on 9/17/2026.
 //
 
-#ifndef BANKMANAGEMENTSYSTEM_BANK_H
-#define BANKMANAGEMENTSYSTEM_BANK_H
+#ifndef BANK_H
+#define BANK_H
+#include <stdbool.h>
 
 typedef struct
 {
@@ -11,6 +12,7 @@ typedef struct
     char name[50];
     char surname[50];
     double balance;
+    bool status;
 } Account;
 
 typedef enum
@@ -34,8 +36,6 @@ typedef struct
 
 } Transaction;
 
-/* Global variables */
-
 extern Account *accounts;
 extern Transaction *transactions;
 
@@ -46,7 +46,9 @@ extern int nextID;
 extern int transactionsCapacity;
 extern int transactionCount;
 
-/* Functions */
+int ReadInt(const char *message);
+double ReadDouble(const char *message);
+void ReadString(const char *message, char value[50]);
 
 int findAccountIndex(int id);
 
@@ -61,12 +63,12 @@ void CreateAccount(void);
 void Deposit(void);
 void Withdraw(void);
 void CreateTransfer(void);
-
 void ShowAccount(void);
 void ListAccounts(void);
 void DeleteAccount(void);
-
+void CloseAccount(void);
+void OpenAccount(void);
+bool CheckAccountStatus(int accountIndex);
 void ShowTransactionsHistory(void);
-
 
 #endif //BANKMANAGEMENTSYSTEM_BANK_H

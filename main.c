@@ -30,8 +30,6 @@ int main(void)
 
     do
     {
-        int choice;
-
         printf("\n\t=== Bank Management System ===\n");
 
         printf("1. Create account\n");
@@ -42,10 +40,11 @@ int main(void)
         printf("6. List accounts\n");
         printf("7. Delete account\n");
         printf("8. Transaction history\n");
+        printf("9. Close account\n");
+        printf("10. Open account\n");
         printf("0. Exit\n");
 
-        printf("Enter: ");
-        scanf("%d", &choice);
+        int choice = ReadInt("Enter");
 
         switch (choice)
         {
@@ -86,6 +85,16 @@ int main(void)
 
             case 8:
                 BankAction = ShowTransactionsHistory;
+                BankAction();
+                break;
+
+            case 9:
+                BankAction = CloseAccount;
+                BankAction();
+                break;
+
+            case 10:
+                BankAction = OpenAccount;
                 BankAction();
                 break;
 
