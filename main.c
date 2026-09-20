@@ -43,6 +43,7 @@ int main(void)
         printf("9. Close account\n");
         printf("10. Open account\n");
         printf("11. Edit account\n");
+        printf("12. Account transaction history\n");
         printf("0. Exit\n");
 
         int choice = ReadInt("Enter");
@@ -126,6 +127,13 @@ int main(void)
                 break;
             }
 
+            case 12:
+            {
+                BankAction = ShowAccountTransactions;
+                BankAction();
+                break;
+            }
+
             case 0:
             {
                 printf("Goodbye!\n");
@@ -135,7 +143,6 @@ int main(void)
 
                 return 0;
             }
-
             default:
             {
                 printf("Invalid option.\n");
@@ -143,5 +150,5 @@ int main(void)
             }
         }
 
-    } while (1);
+    } while (true);
 }

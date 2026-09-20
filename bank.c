@@ -511,6 +511,68 @@ void ShowAccount(void)
     );
 }
 
+void ShowAccountTransactions(void)
+{
+    int id = ReadInt("Enter account ID");
+
+    int index = findAccountIndex(id);
+
+    if (index == -1)
+    {
+        printf("Account not found.\n");
+        return;
+    }
+
+    int found = 0;
+
+    printf("\n=== Account Transaction History ===\n");
+
+    for (int i = 0; i < transactionCount; i++)
+    {
+        if (
+            transactions[i].senderID == id ||
+            transactions[i].receiverID == id
+        )
+        {
+            found = 1;
+
+            if (transactions[i].type == DEPOSIT)
+            {
+                printf(
+                    "DEPOSIT: %s (ID %d) deposited %.2f\n",
+                    transactions[i].senderName,
+                    transactions[i].senderID,
+                    transactions[i].amount
+                );
+            }
+            else if (transactions[i].type == WITHDRAW)
+            {
+                printf(
+                    "WITHDRAW: %s (ID %d) withdrew %.2f\n",
+                    transactions[i].senderName,
+                    transactions[i].senderID,
+                    transactions[i].amount
+                );
+            }
+            else if (transactions[i].type == TRANSFER)
+            {
+                printf(
+                    "TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
+                    transactions[i].senderName,
+                    transactions[i].senderID,
+                    transactions[i].amount,
+                    transactions[i].receiverName,
+                    transactions[i].receiverID
+                );
+            }
+        }
+    }
+
+    if (!found)
+    {
+        printf("No transactions found for this account.\n");
+    }
+}
 
 void ListAccounts(void)
 {

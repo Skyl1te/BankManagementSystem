@@ -76,6 +76,7 @@ void Withdraw(void);
 void CreateTransfer(void);
 
 void ShowAccount(void);
+void ShowAccountTransactions(void);
 void ListAccounts(void);
 
 void DeleteAccount(void);
