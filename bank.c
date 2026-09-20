@@ -18,6 +18,7 @@ int nextID = 1;
 
 int transactionsCapacity = 0;
 int transactionCount = 0;
+int nextTransactionID = 1;
 
 
 /* Input helpers */
@@ -185,6 +186,9 @@ void CreateTransaction(
 
     Transaction transaction;
 
+    transaction.id = nextTransactionID;
+    nextTransactionID++;
+
     transaction.type = type;
     transaction.amount = amount;
 
@@ -264,6 +268,7 @@ void CreateAccount(void)
     );
 }
 
+
 void EditAccount(void)
 {
     int id = ReadInt("Enter account ID you want to edit");
@@ -330,6 +335,7 @@ void EditAccount(void)
         }
     }
 }
+
 
 void Deposit(void)
 {
@@ -511,68 +517,6 @@ void ShowAccount(void)
     );
 }
 
-void ShowAccountTransactions(void)
-{
-    int id = ReadInt("Enter account ID");
-
-    int index = findAccountIndex(id);
-
-    if (index == -1)
-    {
-        printf("Account not found.\n");
-        return;
-    }
-
-    int found = 0;
-
-    printf("\n=== Account Transaction History ===\n");
-
-    for (int i = 0; i < transactionCount; i++)
-    {
-        if (
-            transactions[i].senderID == id ||
-            transactions[i].receiverID == id
-        )
-        {
-            found = 1;
-
-            if (transactions[i].type == DEPOSIT)
-            {
-                printf(
-                    "DEPOSIT: %s (ID %d) deposited %.2f\n",
-                    transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount
-                );
-            }
-            else if (transactions[i].type == WITHDRAW)
-            {
-                printf(
-                    "WITHDRAW: %s (ID %d) withdrew %.2f\n",
-                    transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount
-                );
-            }
-            else if (transactions[i].type == TRANSFER)
-            {
-                printf(
-                    "TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
-                    transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount,
-                    transactions[i].receiverName,
-                    transactions[i].receiverID
-                );
-            }
-        }
-    }
-
-    if (!found)
-    {
-        printf("No transactions found for this account.\n");
-    }
-}
 
 void ListAccounts(void)
 {
@@ -692,7 +636,8 @@ void ShowTransactionsHistory(void)
         if (transactions[i].type == DEPOSIT)
         {
             printf(
-                "DEPOSIT: %s (ID %d) deposited %.2f\n",
+                "Transaction ID: %d | DEPOSIT: %s (ID %d) deposited %.2f\n",
+                transactions[i].id,
                 transactions[i].senderName,
                 transactions[i].senderID,
                 transactions[i].amount
@@ -701,7 +646,8 @@ void ShowTransactionsHistory(void)
         else if (transactions[i].type == WITHDRAW)
         {
             printf(
-                "WITHDRAW: %s (ID %d) withdrew %.2f\n",
+                "Transaction ID: %d | WITHDRAW: %s (ID %d) withdrew %.2f\n",
+                transactions[i].id,
                 transactions[i].senderName,
                 transactions[i].senderID,
                 transactions[i].amount
@@ -710,7 +656,8 @@ void ShowTransactionsHistory(void)
         else if (transactions[i].type == TRANSFER)
         {
             printf(
-                "TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
+                "Transaction ID: %d | TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
+                transactions[i].id,
                 transactions[i].senderName,
                 transactions[i].senderID,
                 transactions[i].amount,
@@ -719,4 +666,132 @@ void ShowTransactionsHistory(void)
             );
         }
     }
+}
+
+
+void ShowAccountTransactions(void)
+{
+    int id = ReadInt("Enter account ID");
+
+    int index = findAccountIndex(id);
+
+    if (index == -1)
+    {
+        printf("Account not found.\n");
+        return;
+    }
+
+    int found = 0;
+
+    printf("\n=== Account Transaction History ===\n");
+
+    for (int i = 0; i < transactionCount; i++)
+    {
+        if (
+            transactions[i].senderID == id ||
+            transactions[i].receiverID == id
+        )
+        {
+            found = 1;
+
+            if (transactions[i].type == DEPOSIT)
+            {
+                printf(
+                    "Transaction ID: %d | DEPOSIT: %s (ID %d) deposited %.2f\n",
+                    transactions[i].id,
+                    transactions[i].senderName,
+                    transactions[i].senderID,
+                    transactions[i].amount
+                );
+            }
+            else if (transactions[i].type == WITHDRAW)
+            {
+                printf(
+                    "Transaction ID: %d | WITHDRAW: %s (ID %d) withdrew %.2f\n",
+                    transactions[i].id,
+                    transactions[i].senderName,
+                    transactions[i].senderID,
+                    transactions[i].amount
+                );
+            }
+            else if (transactions[i].type == TRANSFER)
+            {
+                printf(
+                    "Transaction ID: %d | TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
+                    transactions[i].id,
+                    transactions[i].senderName,
+                    transactions[i].senderID,
+                    transactions[i].amount,
+                    transactions[i].receiverName,
+                    transactions[i].receiverID
+                );
+            }
+        }
+    }
+
+    if (!found)
+    {
+        printf("No transactions found for this account.\n");
+    }
+}
+
+
+/* Bank statistics */
+
+void ShowBankStatistics(void)
+{
+    if (accountCount <= 0)
+    {
+        printf("No accounts found.\n");
+        return;
+    }
+
+    int activeAccounts = 0;
+    int closedAccounts = 0;
+
+    double totalBalance = 0.0;
+    double maxBalance = accounts[0].balance;
+
+    int maxBalanceIndex = 0;
+
+    for (int i = 0; i < accountCount; i++)
+    {
+        if (accounts[i].status)
+        {
+            activeAccounts++;
+        }
+        else
+        {
+            closedAccounts++;
+        }
+
+        totalBalance += accounts[i].balance;
+
+        if (accounts[i].balance > maxBalance)
+        {
+            maxBalance = accounts[i].balance;
+            maxBalanceIndex = i;
+        }
+    }
+
+    double averageBalance = totalBalance / accountCount;
+
+    printf("\n=== Bank Statistics ===\n");
+
+    printf("Total accounts: %d\n", accountCount);
+    printf("Active accounts: %d\n", activeAccounts);
+    printf("Closed accounts: %d\n", closedAccounts);
+
+    printf("Total balance: %.2f\n", totalBalance);
+    printf("Average balance: %.2f\n", averageBalance);
+
+    printf(
+        "Highest balance: %.2f - %s %s (ID %d)\n",
+        maxBalance,
+        accounts[maxBalanceIndex].name,
+        accounts[maxBalanceIndex].surname,
+        accounts[maxBalanceIndex].id
+    );
+
+    printf("Total transactions: %d\n", transactionCount);
 }

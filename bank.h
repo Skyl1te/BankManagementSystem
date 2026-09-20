@@ -24,6 +24,8 @@ typedef enum
 
 typedef struct
 {
+    int id;
+
     TransactionType type;
 
     int senderID;
@@ -47,7 +49,7 @@ extern int nextID;
 
 extern int transactionsCapacity;
 extern int transactionCount;
-
+extern int nextTransactionID;
 
 /* Input */
 
@@ -84,6 +86,8 @@ void CloseAccount(void);
 void OpenAccount(void);
 
 void EditAccount(void);
+
+void ShowBankStatistics(void);
 
 /* Transactions */
 
