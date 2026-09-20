@@ -4,10 +4,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "bank.h"
-
+#include "input.h"
+#include "transaction.h"
 
 Account *accounts = NULL;
 Transaction *transactions = NULL;
@@ -19,100 +19,6 @@ int nextID = 1;
 int transactionsCapacity = 0;
 int transactionCount = 0;
 int nextTransactionID = 1;
-
-
-/* Transaction time */
-
-void PrintTransactionTime(time_t timestamp)
-{
-    char *timeString = ctime(&timestamp);
-
-    timeString[strlen(timeString) - 1] = '\0';
-
-    printf("[%s] ", timeString);
-}
-
-
-/* Input helpers */
-
-int ReadInt(const char *message)
-{
-    char input[100];
-    int value;
-
-    while (true)
-    {
-        printf("%s: ", message);
-
-        if (fgets(input, sizeof(input), stdin) == NULL)
-        {
-            printf("Input error.\n");
-            continue;
-        }
-
-        if (sscanf(input, "%d", &value) == 1)
-        {
-            return value;
-        }
-
-        printf("Invalid input. Enter a number.\n");
-    }
-}
-
-
-double ReadDouble(const char *message)
-{
-    char input[100];
-    double value;
-
-    while (true)
-    {
-        printf("%s: ", message);
-
-        if (fgets(input, sizeof(input), stdin) == NULL)
-        {
-            printf("Input error.\n");
-            continue;
-        }
-
-        if (sscanf(input, "%lf", &value) == 1)
-        {
-            return value;
-        }
-
-        printf("Invalid input. Enter a number.\n");
-    }
-}
-
-
-void ReadString(const char *message, char value[50])
-{
-    printf("%s: ", message);
-
-    if (fgets(value, 50, stdin) == NULL)
-    {
-        value[0] = '\0';
-        return;
-    }
-
-    value[strcspn(value, "\n")] = '\0';
-}
-
-
-double ReadPositiveDouble(const char *message)
-{
-    while (true)
-    {
-        double value = ReadDouble(message);
-
-        if (value > 0)
-        {
-            return value;
-        }
-
-        printf("Value must be greater than 0.\n");
-    }
-}
 
 
 /* Memory management */
@@ -130,10 +36,7 @@ int ResizeAccounts(void)
         newCapacity = accountsCapacity * 2;
     }
 
-    Account *temp = realloc(
-        accounts,
-        newCapacity * sizeof(Account)
-    );
+    Account *temp = realloc(accounts, newCapacity * sizeof(Account));
 
     if (temp == NULL)
     {
@@ -146,7 +49,6 @@ int ResizeAccounts(void)
 
     return 1;
 }
-
 
 int ResizeTransactions(void)
 {
@@ -181,7 +83,6 @@ int ResizeTransactions(void)
 
 /* Account helpers */
 
-/* Returns the index of the account, or -1 if it does not exist. */
 int findAccountIndex(int id)
 {
     for (int i = 0; i < accountCount; i++)
@@ -195,79 +96,15 @@ int findAccountIndex(int id)
     return -1;
 }
 
-
-/* Returns true if the account is active. */
 bool CheckAccountStatus(int accountIndex)
 {
     if (!accounts[accountIndex].status)
     {
-        printf(
-            "Account %d is closed.\n",
-            accounts[accountIndex].id
-        );
-
+        printf("Account %d is closed.\n", accounts[accountIndex].id);
         return false;
     }
 
     return true;
-}
-
-
-/* Transaction operations */
-
-void CreateTransaction(
-    TransactionType type,
-    int senderIndex,
-    int receiverIndex,
-    double amount
-)
-{
-    if (transactionCount >= transactionsCapacity)
-    {
-        if (!ResizeTransactions())
-        {
-            return;
-        }
-    }
-
-    Transaction transaction;
-
-    transaction.id = nextTransactionID;
-    nextTransactionID++;
-
-    transaction.timestamp = time(NULL);
-
-    transaction.type = type;
-    transaction.amount = amount;
-
-    transaction.senderID = accounts[senderIndex].id;
-
-    strcpy(
-        transaction.senderName,
-        accounts[senderIndex].name
-    );
-
-    if (receiverIndex != -1)
-    {
-        transaction.receiverID = accounts[receiverIndex].id;
-
-        strcpy(
-            transaction.receiverName,
-            accounts[receiverIndex].name
-        );
-    }
-    else
-    {
-        transaction.receiverID = -1;
-
-        strcpy(
-            transaction.receiverName,
-            "-"
-        );
-    }
-
-    transactions[transactionCount] = transaction;
-    transactionCount++;
 }
 
 
@@ -320,7 +157,6 @@ void CreateAccount(void)
     );
 }
 
-
 void EditAccount(void)
 {
     int id = ReadInt("Enter account ID you want to edit");
@@ -356,44 +192,28 @@ void EditAccount(void)
     {
         case 1:
         {
-            ReadString(
-                "Enter new name",
-                accounts[index].name
-            );
-
+            ReadString("Enter new name", accounts[index].name);
             printf("Name updated successfully.\n");
             break;
         }
 
         case 2:
         {
-            ReadString(
-                "Enter new surname",
-                accounts[index].surname
-            );
-
+            ReadString("Enter new surname", accounts[index].surname);
             printf("Surname updated successfully.\n");
             break;
         }
 
         case 3:
         {
-            ReadString(
-                "Enter new name",
-                accounts[index].name
-            );
-
-            ReadString(
-                "Enter new surname",
-                accounts[index].surname
-            );
+            ReadString("Enter new name", accounts[index].name);
+            ReadString("Enter new surname", accounts[index].surname);
 
             printf("Name and surname updated successfully.\n");
             break;
         }
     }
 }
-
 
 void Deposit(void)
 {
@@ -418,14 +238,8 @@ void Deposit(void)
     printf("Deposit successful.\n");
     printf("New balance: %.2f\n", accounts[index].balance);
 
-    CreateTransaction(
-        DEPOSIT,
-        index,
-        -1,
-        amount
-    );
+    CreateTransaction(DEPOSIT, index, -1, amount);
 }
-
 
 void Withdraw(void)
 {
@@ -462,14 +276,8 @@ void Withdraw(void)
     printf("Withdraw successful.\n");
     printf("New balance: %.2f\n", accounts[index].balance);
 
-    CreateTransaction(
-        WITHDRAW,
-        index,
-        -1,
-        amount
-    );
+    CreateTransaction(WITHDRAW, index, -1, amount);
 }
-
 
 void CreateTransfer(void)
 {
@@ -511,9 +319,7 @@ void CreateTransfer(void)
 
     while (true)
     {
-        amount = ReadPositiveDouble(
-            "Enter the amount to send"
-        );
+        amount = ReadPositiveDouble("Enter the amount to send");
 
         if (amount <= accounts[senderIndex].balance)
         {
@@ -527,16 +333,8 @@ void CreateTransfer(void)
     accounts[receiverIndex].balance += amount;
 
     printf("Transfer successful.\n");
-
-    printf(
-        "Sender balance: %.2f\n",
-        accounts[senderIndex].balance
-    );
-
-    printf(
-        "Receiver balance: %.2f\n",
-        accounts[receiverIndex].balance
-    );
+    printf("Sender balance: %.2f\n", accounts[senderIndex].balance);
+    printf("Receiver balance: %.2f\n", accounts[receiverIndex].balance);
 
     CreateTransaction(
         TRANSFER,
@@ -545,7 +343,6 @@ void CreateTransfer(void)
         amount
     );
 }
-
 
 void ShowAccount(void)
 {
@@ -567,7 +364,6 @@ void ShowAccount(void)
         accounts[index].status ? "ACTIVE" : "CLOSED"
     );
 }
-
 
 void ListAccounts(void)
 {
@@ -592,13 +388,9 @@ void ListAccounts(void)
     }
 }
 
-
 void DeleteAccount(void)
 {
-    int id = ReadInt(
-        "Enter ID of the account you want to delete"
-    );
-
+    int id = ReadInt("Enter ID of the account you want to delete");
     int index = findAccountIndex(id);
 
     if (index == -1)
@@ -617,13 +409,9 @@ void DeleteAccount(void)
     printf("Account deleted successfully.\n");
 }
 
-
 void CloseAccount(void)
 {
-    int id = ReadInt(
-        "Enter ID of the account you want to close"
-    );
-
+    int id = ReadInt("Enter ID of the account you want to close");
     int index = findAccountIndex(id);
 
     if (index == -1)
@@ -643,13 +431,9 @@ void CloseAccount(void)
     printf("Account closed successfully.\n");
 }
 
-
 void OpenAccount(void)
 {
-    int id = ReadInt(
-        "Enter ID of the account you want to open"
-    );
-
+    int id = ReadInt("Enter ID of the account you want to open");
     int index = findAccountIndex(id);
 
     if (index == -1)
@@ -667,130 +451,6 @@ void OpenAccount(void)
     accounts[index].status = true;
 
     printf("Account opened successfully.\n");
-}
-
-
-/* Transaction history */
-
-void ShowTransactionsHistory(void)
-{
-    if (transactionCount == 0)
-    {
-        printf("No transactions found.\n");
-        return;
-    }
-
-    printf("\n=== Transaction History ===\n");
-
-    for (int i = 0; i < transactionCount; i++)
-    {
-        PrintTransactionTime(
-            transactions[i].timestamp
-        );
-
-        if (transactions[i].type == DEPOSIT)
-        {
-            printf(
-                "Transaction ID: %d | DEPOSIT: %s (ID %d) deposited %.2f\n",
-                transactions[i].id,
-                transactions[i].senderName,
-                transactions[i].senderID,
-                transactions[i].amount
-            );
-        }
-        else if (transactions[i].type == WITHDRAW)
-        {
-            printf(
-                "Transaction ID: %d | WITHDRAW: %s (ID %d) withdrew %.2f\n",
-                transactions[i].id,
-                transactions[i].senderName,
-                transactions[i].senderID,
-                transactions[i].amount
-            );
-        }
-        else if (transactions[i].type == TRANSFER)
-        {
-            printf(
-                "Transaction ID: %d | TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
-                transactions[i].id,
-                transactions[i].senderName,
-                transactions[i].senderID,
-                transactions[i].amount,
-                transactions[i].receiverName,
-                transactions[i].receiverID
-            );
-        }
-    }
-}
-
-
-void ShowAccountTransactions(void)
-{
-    int id = ReadInt("Enter account ID");
-    int index = findAccountIndex(id);
-
-    if (index == -1)
-    {
-        printf("Account not found.\n");
-        return;
-    }
-
-    int found = 0;
-
-    printf("\n=== Account Transaction History ===\n");
-
-    for (int i = 0; i < transactionCount; i++)
-    {
-        if (
-            transactions[i].senderID == id ||
-            transactions[i].receiverID == id
-        )
-        {
-            found = 1;
-
-            PrintTransactionTime(
-                transactions[i].timestamp
-            );
-
-            if (transactions[i].type == DEPOSIT)
-            {
-                printf(
-                    "Transaction ID: %d | DEPOSIT: %s (ID %d) deposited %.2f\n",
-                    transactions[i].id,
-                    transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount
-                );
-            }
-            else if (transactions[i].type == WITHDRAW)
-            {
-                printf(
-                    "Transaction ID: %d | WITHDRAW: %s (ID %d) withdrew %.2f\n",
-                    transactions[i].id,
-                    transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount
-                );
-            }
-            else if (transactions[i].type == TRANSFER)
-            {
-                printf(
-                    "Transaction ID: %d | TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
-                    transactions[i].id,
-                    transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount,
-                    transactions[i].receiverName,
-                    transactions[i].receiverID
-                );
-            }
-        }
-    }
-
-    if (!found)
-    {
-        printf("No transactions found for this account.\n");
-    }
 }
 
 
@@ -835,11 +495,9 @@ void ShowBankStatistics(void)
     double averageBalance = totalBalance / accountCount;
 
     printf("\n=== Bank Statistics ===\n");
-
     printf("Total accounts: %d\n", accountCount);
     printf("Active accounts: %d\n", activeAccounts);
     printf("Closed accounts: %d\n", closedAccounts);
-
     printf("Total balance: %.2f\n", totalBalance);
     printf("Average balance: %.2f\n", averageBalance);
 

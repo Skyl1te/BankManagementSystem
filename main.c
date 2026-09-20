@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "bank.h"
+#include "input.h"
+#include "transaction.h"
 
 void (*BankAction)(void);
 
@@ -10,13 +12,8 @@ int main(void)
     accountsCapacity = 10;
     transactionsCapacity = 10;
 
-    accounts = malloc(
-        accountsCapacity * sizeof(Account)
-    );
-
-    transactions = malloc(
-        transactionsCapacity * sizeof(Transaction)
-    );
+    accounts = malloc(accountsCapacity * sizeof(Account));
+    transactions = malloc(transactionsCapacity * sizeof(Transaction));
 
     if (accounts == NULL || transactions == NULL)
     {
@@ -28,10 +25,9 @@ int main(void)
         return 1;
     }
 
-    do
+    while (true)
     {
         printf("\n\t=== Bank Management System ===\n");
-
         printf("1. Create account\n");
         printf("2. Deposit\n");
         printf("3. Withdraw\n");
@@ -151,12 +147,12 @@ int main(void)
 
                 return 0;
             }
+
             default:
             {
                 printf("Invalid option.\n");
                 break;
             }
         }
-
-    } while (true);
+    }
 }
