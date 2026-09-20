@@ -5,6 +5,7 @@
 #ifndef BANK_H
 #define BANK_H
 #include <stdbool.h>
+#include <time.h>
 
 typedef struct
 {
@@ -35,6 +36,8 @@ typedef struct
 
     char senderName[50];
     char receiverName[50];
+
+    time_t timestamp;
 } Transaction;
 
 
@@ -97,6 +100,8 @@ void CreateTransaction(
     int receiverIndex,
     double amount
 );
+
+void PrintTransactionTime();
 
 void ShowTransactionsHistory(void);
 

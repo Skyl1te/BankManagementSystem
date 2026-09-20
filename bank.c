@@ -21,6 +21,18 @@ int transactionCount = 0;
 int nextTransactionID = 1;
 
 
+/* Transaction time */
+
+void PrintTransactionTime(time_t timestamp)
+{
+    char *timeString = ctime(&timestamp);
+
+    timeString[strlen(timeString) - 1] = '\0';
+
+    printf("[%s] ", timeString);
+}
+
+
 /* Input helpers */
 
 int ReadInt(const char *message)
@@ -188,6 +200,8 @@ void CreateTransaction(
 
     transaction.id = nextTransactionID;
     nextTransactionID++;
+
+    transaction.timestamp = time(NULL);
 
     transaction.type = type;
     transaction.amount = amount;
@@ -633,6 +647,10 @@ void ShowTransactionsHistory(void)
 
     for (int i = 0; i < transactionCount; i++)
     {
+        PrintTransactionTime(
+            transactions[i].timestamp
+        );
+
         if (transactions[i].type == DEPOSIT)
         {
             printf(
@@ -693,6 +711,10 @@ void ShowAccountTransactions(void)
         )
         {
             found = 1;
+
+            PrintTransactionTime(
+                transactions[i].timestamp
+            );
 
             if (transactions[i].type == DEPOSIT)
             {
