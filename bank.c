@@ -37,39 +37,51 @@ void PrintTransactionTime(time_t timestamp)
 
 int ReadInt(const char *message)
 {
+    char input[100];
     int value;
 
-    printf("%s: ", message);
-
-    while (scanf("%d", &value) != 1)
+    while (true)
     {
-        printf("Invalid input. Enter a number: ");
+        printf("%s: ", message);
 
-        while (getchar() != '\n')
+        if (fgets(input, sizeof(input), stdin) == NULL)
         {
+            printf("Input error.\n");
+            continue;
         }
-    }
 
-    return value;
+        if (sscanf(input, "%d", &value) == 1)
+        {
+            return value;
+        }
+
+        printf("Invalid input. Enter a number.\n");
+    }
 }
 
 
 double ReadDouble(const char *message)
 {
+    char input[100];
     double value;
 
-    printf("%s: ", message);
-
-    while (scanf("%lf", &value) != 1)
+    while (true)
     {
-        printf("Invalid input. Enter a number: ");
+        printf("%s: ", message);
 
-        while (getchar() != '\n')
+        if (fgets(input, sizeof(input), stdin) == NULL)
         {
+            printf("Input error.\n");
+            continue;
         }
-    }
 
-    return value;
+        if (sscanf(input, "%lf", &value) == 1)
+        {
+            return value;
+        }
+
+        printf("Invalid input. Enter a number.\n");
+    }
 }
 
 
@@ -77,7 +89,29 @@ void ReadString(const char *message, char value[50])
 {
     printf("%s: ", message);
 
-    scanf("%49s", value);
+    if (fgets(value, 50, stdin) == NULL)
+    {
+        value[0] = '\0';
+        return;
+    }
+
+    value[strcspn(value, "\n")] = '\0';
+}
+
+
+double ReadPositiveDouble(const char *message)
+{
+    while (true)
+    {
+        double value = ReadDouble(message);
+
+        if (value > 0)
+        {
+            return value;
+        }
+
+        printf("Value must be greater than 0.\n");
+    }
 }
 
 
@@ -254,12 +288,16 @@ void CreateAccount(void)
     ReadString("Enter name", user.name);
     ReadString("Enter surname", user.surname);
 
-    user.balance = ReadDouble("Enter balance");
-
-    if (user.balance < 0)
+    while (true)
     {
-        printf("Invalid balance.\n");
-        return;
+        user.balance = ReadDouble("Enter balance");
+
+        if (user.balance >= 0)
+        {
+            break;
+        }
+
+        printf("Balance cannot be negative.\n");
     }
 
     user.id = nextID;
@@ -294,13 +332,25 @@ void EditAccount(void)
         return;
     }
 
-    int choice = ReadInt(
-        "What do you want to edit?\n"
-        "1. Name\n"
-        "2. Surname\n"
-        "3. Name and surname\n"
-        "Your choice"
-    );
+    int choice;
+
+    while (true)
+    {
+        choice = ReadInt(
+            "What do you want to edit?\n"
+            "1. Name\n"
+            "2. Surname\n"
+            "3. Name and surname\n"
+            "Your choice"
+        );
+
+        if (choice >= 1 && choice <= 3)
+        {
+            break;
+        }
+
+        printf("Invalid option.\n");
+    }
 
     switch (choice)
     {
@@ -341,12 +391,6 @@ void EditAccount(void)
             printf("Name and surname updated successfully.\n");
             break;
         }
-
-        default:
-        {
-            printf("Invalid option.\n");
-            break;
-        }
     }
 }
 
@@ -354,7 +398,6 @@ void EditAccount(void)
 void Deposit(void)
 {
     int id = ReadInt("Enter account ID");
-
     int index = findAccountIndex(id);
 
     if (index == -1)
@@ -368,13 +411,7 @@ void Deposit(void)
         return;
     }
 
-    double amount = ReadDouble("Enter amount");
-
-    if (amount <= 0)
-    {
-        printf("Invalid amount.\n");
-        return;
-    }
+    double amount = ReadPositiveDouble("Enter amount");
 
     accounts[index].balance += amount;
 
@@ -393,7 +430,6 @@ void Deposit(void)
 void Withdraw(void)
 {
     int id = ReadInt("Enter account ID");
-
     int index = findAccountIndex(id);
 
     if (index == -1)
@@ -407,18 +443,18 @@ void Withdraw(void)
         return;
     }
 
-    double amount = ReadDouble("Enter amount");
+    double amount;
 
-    if (amount <= 0)
+    while (true)
     {
-        printf("Invalid amount.\n");
-        return;
-    }
+        amount = ReadPositiveDouble("Enter amount");
 
-    if (amount > accounts[index].balance)
-    {
+        if (amount <= accounts[index].balance)
+        {
+            break;
+        }
+
         printf("Not enough money.\n");
-        return;
     }
 
     accounts[index].balance -= amount;
@@ -471,18 +507,20 @@ void CreateTransfer(void)
         return;
     }
 
-    double amount = ReadDouble("Enter the amount to send");
+    double amount;
 
-    if (amount <= 0)
+    while (true)
     {
-        printf("Invalid amount.\n");
-        return;
-    }
+        amount = ReadPositiveDouble(
+            "Enter the amount to send"
+        );
 
-    if (amount > accounts[senderIndex].balance)
-    {
+        if (amount <= accounts[senderIndex].balance)
+        {
+            break;
+        }
+
         printf("You don't have enough money to send.\n");
-        return;
     }
 
     accounts[senderIndex].balance -= amount;
@@ -512,7 +550,6 @@ void CreateTransfer(void)
 void ShowAccount(void)
 {
     int id = ReadInt("Enter account ID");
-
     int index = findAccountIndex(id);
 
     if (index == -1)
@@ -690,7 +727,6 @@ void ShowTransactionsHistory(void)
 void ShowAccountTransactions(void)
 {
     int id = ReadInt("Enter account ID");
-
     int index = findAccountIndex(id);
 
     if (index == -1)

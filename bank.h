@@ -72,6 +72,7 @@ int ResizeTransactions(void);
 int findAccountIndex(int id);
 bool CheckAccountStatus(int accountIndex);
 
+double ReadPositiveDouble(const char *message);
 
 /* Account functions */
 
