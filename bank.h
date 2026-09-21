@@ -64,7 +64,6 @@ void CloseAccount(void);
 void OpenAccount(void);
 
 void ShowBankStatistics(void);
-
 void SortAccounts(void);
 
 #endif

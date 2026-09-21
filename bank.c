@@ -64,10 +64,7 @@ int ResizeTransactions(void)
         newCapacity = transactionsCapacity * 2;
     }
 
-    Transaction *temp = realloc(
-        transactions,
-        newCapacity * sizeof(Transaction)
-    );
+    Transaction *temp = realloc(transactions, newCapacity * sizeof(Transaction));
 
     if (temp == NULL)
     {
@@ -157,7 +154,6 @@ void CreateAccount(void)
     );
 
     PrintMoney(user.balance);
-
     printf(", Status: ACTIVE\n");
 }
 
@@ -197,7 +193,6 @@ void EditAccount(void)
         case 1:
         {
             ReadString("Enter new name", accounts[index].name);
-
             printf("Name updated successfully.\n");
             break;
         }
@@ -205,7 +200,6 @@ void EditAccount(void)
         case 2:
         {
             ReadString("Enter new surname", accounts[index].surname);
-
             printf("Surname updated successfully.\n");
             break;
         }
@@ -251,7 +245,6 @@ void Deposit(void)
     printf("New balance: ");
 
     PrintMoney(accounts[index].balance);
-
     printf("\n");
 
     CreateTransaction(DEPOSIT, index, -1, amount);
@@ -299,7 +292,6 @@ void Withdraw(void)
     printf("New balance: ");
 
     PrintMoney(accounts[index].balance);
-
     printf("\n");
 
     CreateTransaction(WITHDRAW, index, -1, amount);
@@ -374,12 +366,7 @@ void CreateTransfer(void)
     PrintMoney(accounts[receiverIndex].balance);
     printf("\n");
 
-    CreateTransaction(
-        TRANSFER,
-        senderIndex,
-        receiverIndex,
-        amount
-    );
+    CreateTransaction(TRANSFER, senderIndex, receiverIndex, amount);
 }
 
 void ShowAccount(void)
@@ -578,8 +565,7 @@ void ShowBankStatistics(void)
         }
     }
 
-    long long averageBalance =
-        (totalBalance + accountCount / 2) / accountCount;
+    long long averageBalance = (totalBalance + accountCount / 2) / accountCount;
 
     printf("\n=== Bank Statistics ===\n");
     printf("Total accounts: %d\n", accountCount);

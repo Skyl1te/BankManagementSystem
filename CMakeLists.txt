@@ -9,4 +9,6 @@ add_executable(BankManagementSystem main.c
         input.c
         input.h
         transaction.c
-        transaction.h)
+        transaction.h
+        storage.c
+        storage.h)

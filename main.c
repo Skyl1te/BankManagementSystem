@@ -4,6 +4,7 @@
 #include "bank.h"
 #include "input.h"
 #include "transaction.h"
+#include "storage.h"
 
 void (*BankAction)(void);
 
@@ -24,6 +25,8 @@ int main(void)
 
         return 1;
     }
+
+    LoadData();
 
     while (true)
     {
@@ -156,6 +159,8 @@ int main(void)
 
             case 0:
             {
+                SaveData();
+
                 printf("Goodbye!\n");
 
                 free(accounts);

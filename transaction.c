@@ -20,53 +20,6 @@ void PrintTransactionTime(time_t timestamp)
     printf("[%s] ", timeString);
 }
 
-void CreateTransaction(
-    TransactionType type,
-    int senderIndex,
-    int receiverIndex,
-    long long amount
-)
-{
-    Transaction transaction;
-
-    transaction.id = nextTransactionID;
-    nextTransactionID++;
-
-    transaction.timestamp = time(NULL);
-
-    transaction.type = type;
-    transaction.amount = amount;
-
-    transaction.senderID = accounts[senderIndex].id;
-
-    strcpy(
-        transaction.senderName,
-        accounts[senderIndex].name
-    );
-
-    if (receiverIndex != -1)
-    {
-        transaction.receiverID = accounts[receiverIndex].id;
-
-        strcpy(
-            transaction.receiverName,
-            accounts[receiverIndex].name
-        );
-    }
-    else
-    {
-        transaction.receiverID = -1;
-
-        strcpy(
-            transaction.receiverName,
-            "-"
-        );
-    }
-
-    transactions[transactionCount] = transaction;
-    transactionCount++;
-}
-
 bool EnsureTransactionCapacity(void)
 {
     if (transactionCount < transactionsCapacity)
@@ -80,6 +33,40 @@ bool EnsureTransactionCapacity(void)
     }
 
     return true;
+}
+
+void CreateTransaction(
+    TransactionType type,
+    int senderIndex,
+    int receiverIndex,
+    long long amount
+)
+{
+    Transaction transaction;
+
+    transaction.id = nextTransactionID;
+    nextTransactionID++;
+
+    transaction.timestamp = time(NULL);
+    transaction.type = type;
+    transaction.amount = amount;
+
+    transaction.senderID = accounts[senderIndex].id;
+    strcpy(transaction.senderName, accounts[senderIndex].name);
+
+    if (receiverIndex != -1)
+    {
+        transaction.receiverID = accounts[receiverIndex].id;
+        strcpy(transaction.receiverName, accounts[receiverIndex].name);
+    }
+    else
+    {
+        transaction.receiverID = -1;
+        strcpy(transaction.receiverName, "-");
+    }
+
+    transactions[transactionCount] = transaction;
+    transactionCount++;
 }
 
 void ShowTransactionsHistory(void)

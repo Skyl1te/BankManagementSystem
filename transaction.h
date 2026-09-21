@@ -5,6 +5,8 @@
 
 void PrintTransactionTime(time_t timestamp);
 
+bool EnsureTransactionCapacity(void);
+
 void CreateTransaction(
     TransactionType type,
     int senderIndex,
@@ -14,7 +16,5 @@ void CreateTransaction(
 
 void ShowTransactionsHistory(void);
 void ShowAccountTransactions(void);
-
-bool EnsureTransactionCapacity(void);
 
 #endif
