@@ -9,7 +9,7 @@ void CreateTransaction(
     TransactionType type,
     int senderIndex,
     int receiverIndex,
-    double amount
+    long long amount
 );
 
 void ShowTransactionsHistory(void);

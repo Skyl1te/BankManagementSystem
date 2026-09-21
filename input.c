@@ -65,11 +65,23 @@ void ReadString(const char *message, char value[50])
     value[strcspn(value, "\n")] = '\0';
 }
 
-double ReadPositiveDouble(const char *message)
+long long ReadMoney(const char *message)
+{
+    double value = ReadDouble(message);
+
+    if (value >= 0)
+    {
+        return (long long)(value * 100 + 0.5);
+    }
+
+    return (long long)(value * 100 - 0.5);
+}
+
+long long ReadPositiveMoney(const char *message)
 {
     while (true)
     {
-        double value = ReadDouble(message);
+        long long value = ReadMoney(message);
 
         if (value > 0)
         {
@@ -78,4 +90,15 @@ double ReadPositiveDouble(const char *message)
 
         printf("Value must be greater than 0.\n");
     }
+}
+
+void PrintMoney(long long amount)
+{
+    if (amount < 0)
+    {
+        printf("-");
+        amount = -amount;
+    }
+
+    printf("%lld.%02lld", amount / 100, amount % 100);
 }

@@ -9,7 +9,7 @@ typedef struct
     int id;
     char name[50];
     char surname[50];
-    double balance;
+    long long balance;
     bool status;
 } Account;
 
@@ -26,7 +26,7 @@ typedef struct
     TransactionType type;
     int senderID;
     int receiverID;
-    double amount;
+    long long amount;
     char senderName[50];
     char receiverName[50];
     time_t timestamp;
@@ -57,7 +57,7 @@ void CreateTransfer(void);
 
 void ShowAccount(void);
 void ListAccounts(void);
-void SearchAccount(void);
+void ShowAccountsByName(void);
 
 void DeleteAccount(void);
 void CloseAccount(void);

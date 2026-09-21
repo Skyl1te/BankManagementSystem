@@ -24,7 +24,7 @@ void CreateTransaction(
     TransactionType type,
     int senderIndex,
     int receiverIndex,
-    double amount
+    long long amount
 )
 {
     if (transactionCount >= transactionsCapacity)
@@ -92,31 +92,40 @@ void ShowTransactionsHistory(void)
         if (transactions[i].type == DEPOSIT)
         {
             printf(
-                "Transaction ID: %d | DEPOSIT: %s (ID %d) deposited %.2f\n",
+                "Transaction ID: %d | DEPOSIT: %s (ID %d) deposited ",
                 transactions[i].id,
                 transactions[i].senderName,
-                transactions[i].senderID,
-                transactions[i].amount
+                transactions[i].senderID
             );
+
+            PrintMoney(transactions[i].amount);
+            printf("\n");
         }
         else if (transactions[i].type == WITHDRAW)
         {
             printf(
-                "Transaction ID: %d | WITHDRAW: %s (ID %d) withdrew %.2f\n",
+                "Transaction ID: %d | WITHDRAW: %s (ID %d) withdrew ",
                 transactions[i].id,
                 transactions[i].senderName,
-                transactions[i].senderID,
-                transactions[i].amount
+                transactions[i].senderID
             );
+
+            PrintMoney(transactions[i].amount);
+            printf("\n");
         }
         else if (transactions[i].type == TRANSFER)
         {
             printf(
-                "Transaction ID: %d | TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
+                "Transaction ID: %d | TRANSFER: %s (ID %d) sent ",
                 transactions[i].id,
                 transactions[i].senderName,
-                transactions[i].senderID,
-                transactions[i].amount,
+                transactions[i].senderID
+            );
+
+            PrintMoney(transactions[i].amount);
+
+            printf(
+                " to %s (ID %d)\n",
                 transactions[i].receiverName,
                 transactions[i].receiverID
             );
@@ -153,31 +162,40 @@ void ShowAccountTransactions(void)
             if (transactions[i].type == DEPOSIT)
             {
                 printf(
-                    "Transaction ID: %d | DEPOSIT: %s (ID %d) deposited %.2f\n",
+                    "Transaction ID: %d | DEPOSIT: %s (ID %d) deposited ",
                     transactions[i].id,
                     transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount
+                    transactions[i].senderID
                 );
+
+                PrintMoney(transactions[i].amount);
+                printf("\n");
             }
             else if (transactions[i].type == WITHDRAW)
             {
                 printf(
-                    "Transaction ID: %d | WITHDRAW: %s (ID %d) withdrew %.2f\n",
+                    "Transaction ID: %d | WITHDRAW: %s (ID %d) withdrew ",
                     transactions[i].id,
                     transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount
+                    transactions[i].senderID
                 );
+
+                PrintMoney(transactions[i].amount);
+                printf("\n");
             }
             else if (transactions[i].type == TRANSFER)
             {
                 printf(
-                    "Transaction ID: %d | TRANSFER: %s (ID %d) sent %.2f to %s (ID %d)\n",
+                    "Transaction ID: %d | TRANSFER: %s (ID %d) sent ",
                     transactions[i].id,
                     transactions[i].senderName,
-                    transactions[i].senderID,
-                    transactions[i].amount,
+                    transactions[i].senderID
+                );
+
+                PrintMoney(transactions[i].amount);
+
+                printf(
+                    " to %s (ID %d)\n",
                     transactions[i].receiverName,
                     transactions[i].receiverID
                 );

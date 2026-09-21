@@ -141,7 +141,7 @@ int main(void)
 
             case 14:
             {
-                BankAction = SearchAccount;
+                BankAction = ShowAccountsByName;
                 BankAction();
                 break;
             }

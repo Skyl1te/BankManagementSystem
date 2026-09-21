@@ -4,11 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "bank.h"
-
 #include <string.h>
 
+#include "bank.h"
 #include "input.h"
 #include "transaction.h"
 
@@ -130,7 +128,7 @@ void CreateAccount(void)
 
     while (true)
     {
-        user.balance = ReadDouble("Enter balance");
+        user.balance = ReadMoney("Enter balance");
 
         if (user.balance >= 0)
         {
@@ -152,12 +150,15 @@ void CreateAccount(void)
     printf("Account ID: %d\n", user.id);
 
     printf(
-        "ID: %d, Name: %s, Surname: %s, Balance: %.2f, Status: ACTIVE\n",
+        "ID: %d, Name: %s, Surname: %s, Balance: ",
         user.id,
         user.name,
-        user.surname,
-        user.balance
+        user.surname
     );
+
+    PrintMoney(user.balance);
+
+    printf(", Status: ACTIVE\n");
 }
 
 void EditAccount(void)
@@ -196,6 +197,7 @@ void EditAccount(void)
         case 1:
         {
             ReadString("Enter new name", accounts[index].name);
+
             printf("Name updated successfully.\n");
             break;
         }
@@ -203,6 +205,7 @@ void EditAccount(void)
         case 2:
         {
             ReadString("Enter new surname", accounts[index].surname);
+
             printf("Surname updated successfully.\n");
             break;
         }
@@ -234,12 +237,16 @@ void Deposit(void)
         return;
     }
 
-    double amount = ReadPositiveDouble("Enter amount");
+    long long amount = ReadPositiveMoney("Enter amount");
 
     accounts[index].balance += amount;
 
     printf("Deposit successful.\n");
-    printf("New balance: %.2f\n", accounts[index].balance);
+    printf("New balance: ");
+
+    PrintMoney(accounts[index].balance);
+
+    printf("\n");
 
     CreateTransaction(DEPOSIT, index, -1, amount);
 }
@@ -260,11 +267,11 @@ void Withdraw(void)
         return;
     }
 
-    double amount;
+    long long amount;
 
     while (true)
     {
-        amount = ReadPositiveDouble("Enter amount");
+        amount = ReadPositiveMoney("Enter amount");
 
         if (amount <= accounts[index].balance)
         {
@@ -277,7 +284,11 @@ void Withdraw(void)
     accounts[index].balance -= amount;
 
     printf("Withdraw successful.\n");
-    printf("New balance: %.2f\n", accounts[index].balance);
+    printf("New balance: ");
+
+    PrintMoney(accounts[index].balance);
+
+    printf("\n");
 
     CreateTransaction(WITHDRAW, index, -1, amount);
 }
@@ -318,11 +329,11 @@ void CreateTransfer(void)
         return;
     }
 
-    double amount;
+    long long amount;
 
     while (true)
     {
-        amount = ReadPositiveDouble("Enter the amount to send");
+        amount = ReadPositiveMoney("Enter the amount to send");
 
         if (amount <= accounts[senderIndex].balance)
         {
@@ -336,8 +347,14 @@ void CreateTransfer(void)
     accounts[receiverIndex].balance += amount;
 
     printf("Transfer successful.\n");
-    printf("Sender balance: %.2f\n", accounts[senderIndex].balance);
-    printf("Receiver balance: %.2f\n", accounts[receiverIndex].balance);
+
+    printf("Sender balance: ");
+    PrintMoney(accounts[senderIndex].balance);
+    printf("\n");
+
+    printf("Receiver balance: ");
+    PrintMoney(accounts[receiverIndex].balance);
+    printf("\n");
 
     CreateTransaction(
         TRANSFER,
@@ -359,11 +376,16 @@ void ShowAccount(void)
     }
 
     printf(
-        "ID: %d, Name: %s, Surname: %s, Balance: %.2f, Status: %s\n",
+        "ID: %d, Name: %s, Surname: %s, Balance: ",
         accounts[index].id,
         accounts[index].name,
-        accounts[index].surname,
-        accounts[index].balance,
+        accounts[index].surname
+    );
+
+    PrintMoney(accounts[index].balance);
+
+    printf(
+        ", Status: %s\n",
         accounts[index].status ? "ACTIVE" : "CLOSED"
     );
 }
@@ -381,13 +403,56 @@ void ListAccounts(void)
     for (int i = 0; i < accountCount; i++)
     {
         printf(
-            "ID: %d, Name: %s, Surname: %s, Balance: %.2f, Status: %s\n",
+            "ID: %d, Name: %s, Surname: %s, Balance: ",
             accounts[i].id,
             accounts[i].name,
-            accounts[i].surname,
-            accounts[i].balance,
+            accounts[i].surname
+        );
+
+        PrintMoney(accounts[i].balance);
+
+        printf(
+            ", Status: %s\n",
             accounts[i].status ? "ACTIVE" : "CLOSED"
         );
+    }
+}
+
+void ShowAccountsByName(void)
+{
+    char search[50];
+    int found = 0;
+
+    ReadString("Enter name or surname", search);
+
+    for (int i = 0; i < accountCount; i++)
+    {
+        if (
+            strcmp(accounts[i].name, search) == 0 ||
+            strcmp(accounts[i].surname, search) == 0
+        )
+        {
+            printf(
+                "ID: %d, Name: %s, Surname: %s, Balance: ",
+                accounts[i].id,
+                accounts[i].name,
+                accounts[i].surname
+            );
+
+            PrintMoney(accounts[i].balance);
+
+            printf(
+                ", Status: %s\n",
+                accounts[i].status ? "ACTIVE" : "CLOSED"
+            );
+
+            found = 1;
+        }
+    }
+
+    if (!found)
+    {
+        printf("Account not found.\n");
     }
 }
 
@@ -470,8 +535,8 @@ void ShowBankStatistics(void)
     int activeAccounts = 0;
     int closedAccounts = 0;
 
-    double totalBalance = 0.0;
-    double maxBalance = accounts[0].balance;
+    long long totalBalance = 0;
+    long long maxBalance = accounts[0].balance;
 
     int maxBalanceIndex = 0;
 
@@ -495,55 +560,31 @@ void ShowBankStatistics(void)
         }
     }
 
-    double averageBalance = totalBalance / accountCount;
+    long long averageBalance =
+        (totalBalance + accountCount / 2) / accountCount;
 
     printf("\n=== Bank Statistics ===\n");
     printf("Total accounts: %d\n", accountCount);
     printf("Active accounts: %d\n", activeAccounts);
     printf("Closed accounts: %d\n", closedAccounts);
-    printf("Total balance: %.2f\n", totalBalance);
-    printf("Average balance: %.2f\n", averageBalance);
+
+    printf("Total balance: ");
+    PrintMoney(totalBalance);
+    printf("\n");
+
+    printf("Average balance: ");
+    PrintMoney(averageBalance);
+    printf("\n");
+
+    printf("Highest balance: ");
+    PrintMoney(maxBalance);
 
     printf(
-        "Highest balance: %.2f - %s %s (ID %d)\n",
-        maxBalance,
+        " - %s %s (ID %d)\n",
         accounts[maxBalanceIndex].name,
         accounts[maxBalanceIndex].surname,
         accounts[maxBalanceIndex].id
     );
 
     printf("Total transactions: %d\n", transactionCount);
-}
-
-void SearchAccount(void)
-{
-    char search[50];
-    int found = 0;
-
-    ReadString("Enter name or surname", search);
-
-    for (int i = 0; i < accountCount; i++)
-    {
-        if (
-            strcmp(accounts[i].name, search) == 0 ||
-            strcmp(accounts[i].surname, search) == 0
-        )
-        {
-            printf(
-                "ID: %d, Name: %s, Surname: %s, Balance: %.2f, Status: %s\n",
-                accounts[i].id,
-                accounts[i].name,
-                accounts[i].surname,
-                accounts[i].balance,
-                accounts[i].status ? "ACTIVE" : "CLOSED"
-            );
-
-            found = 1;
-        }
-    }
-
-    if (!found)
-    {
-        printf("Account not found.\n");
-    }
 }
