@@ -42,6 +42,7 @@ int main(void)
         printf("12. Account transaction history\n");
         printf("13. Bank statistics\n");
         printf("14. Search account\n");
+        printf("15. Sort accounts\n");
         printf("0. Exit\n");
 
         int choice = ReadInt("Enter");
@@ -142,6 +143,13 @@ int main(void)
             case 14:
             {
                 BankAction = ShowAccountsByName;
+                BankAction();
+                break;
+            }
+
+            case 15:
+            {
+                BankAction = SortAccounts;
                 BankAction();
                 break;
             }

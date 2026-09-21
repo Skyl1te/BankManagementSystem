@@ -606,3 +606,133 @@ void ShowBankStatistics(void)
 
     printf("Total transactions: %d\n", transactionCount);
 }
+
+
+/* Account sorting */
+
+int CompareByID(const void *a, const void *b)
+{
+    const Account *accountA = a;
+    const Account *accountB = b;
+
+    if (accountA->id < accountB->id)
+    {
+        return -1;
+    }
+
+    if (accountA->id > accountB->id)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+int CompareByName(const void *a, const void *b)
+{
+    const Account *accountA = a;
+    const Account *accountB = b;
+
+    return strcmp(accountA->name, accountB->name);
+}
+
+int CompareByBalance(const void *a, const void *b)
+{
+    const Account *accountA = a;
+    const Account *accountB = b;
+
+    if (accountA->balance < accountB->balance)
+    {
+        return -1;
+    }
+
+    if (accountA->balance > accountB->balance)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+void SortAccounts(void)
+{
+    if (accountCount == 0)
+    {
+        printf("No accounts found.\n");
+        return;
+    }
+
+    int sortType;
+    int order;
+
+    while (true)
+    {
+        sortType = ReadInt(
+            "Sort accounts by:\n"
+            "1. ID\n"
+            "2. Name\n"
+            "3. Balance\n"
+            "Your choice"
+        );
+
+        if (sortType >= 1 && sortType <= 3)
+        {
+            break;
+        }
+
+        printf("Invalid option.\n");
+    }
+
+    while (true)
+    {
+        order = ReadInt(
+            "Sort order:\n"
+            "1. Ascending\n"
+            "2. Descending\n"
+            "Your choice"
+        );
+
+        if (order == 1 || order == 2)
+        {
+            break;
+        }
+
+        printf("Invalid option.\n");
+    }
+
+    switch (sortType)
+    {
+        case 1:
+        {
+            qsort(accounts, accountCount, sizeof(Account), CompareByID);
+            break;
+        }
+
+        case 2:
+        {
+            qsort(accounts, accountCount, sizeof(Account), CompareByName);
+            break;
+        }
+
+        case 3:
+        {
+            qsort(accounts, accountCount, sizeof(Account), CompareByBalance);
+            break;
+        }
+    }
+
+    if (order == 2)
+    {
+        for (int i = 0; i < accountCount / 2; i++)
+        {
+            Account temp = accounts[i];
+
+            accounts[i] = accounts[accountCount - 1 - i];
+            accounts[accountCount - 1 - i] = temp;
+        }
+    }
+
+    printf("Accounts sorted successfully.\n");
+
+    ListAccounts();
+}
