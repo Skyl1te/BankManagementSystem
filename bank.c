@@ -239,6 +239,12 @@ void Deposit(void)
 
     long long amount = ReadPositiveMoney("Enter amount");
 
+    if (!EnsureTransactionCapacity())
+    {
+        printf("Transaction failed.\n");
+        return;
+    }
+
     accounts[index].balance += amount;
 
     printf("Deposit successful.\n");
@@ -279,6 +285,12 @@ void Withdraw(void)
         }
 
         printf("Not enough money.\n");
+    }
+
+    if (!EnsureTransactionCapacity())
+    {
+        printf("Transaction failed.\n");
+        return;
     }
 
     accounts[index].balance -= amount;
@@ -341,6 +353,12 @@ void CreateTransfer(void)
         }
 
         printf("You don't have enough money to send.\n");
+    }
+
+    if (!EnsureTransactionCapacity())
+    {
+        printf("Transaction failed.\n");
+        return;
     }
 
     accounts[senderIndex].balance -= amount;

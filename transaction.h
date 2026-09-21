@@ -15,4 +15,6 @@ void CreateTransaction(
 void ShowTransactionsHistory(void);
 void ShowAccountTransactions(void);
 
+bool EnsureTransactionCapacity(void);
+
 #endif

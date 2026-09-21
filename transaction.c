@@ -27,14 +27,6 @@ void CreateTransaction(
     long long amount
 )
 {
-    if (transactionCount >= transactionsCapacity)
-    {
-        if (!ResizeTransactions())
-        {
-            return;
-        }
-    }
-
     Transaction transaction;
 
     transaction.id = nextTransactionID;
@@ -73,6 +65,21 @@ void CreateTransaction(
 
     transactions[transactionCount] = transaction;
     transactionCount++;
+}
+
+bool EnsureTransactionCapacity(void)
+{
+    if (transactionCount < transactionsCapacity)
+    {
+        return true;
+    }
+
+    if (!ResizeTransactions())
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void ShowTransactionsHistory(void)
