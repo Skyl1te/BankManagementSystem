@@ -57,6 +57,7 @@ void CreateTransfer(void);
 
 void ShowAccount(void);
 void ListAccounts(void);
+void SearchAccount(void);
 
 void DeleteAccount(void);
 void CloseAccount(void);

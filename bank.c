@@ -6,6 +6,9 @@
 #include <stdlib.h>
 
 #include "bank.h"
+
+#include <string.h>
+
 #include "input.h"
 #include "transaction.h"
 
@@ -510,4 +513,37 @@ void ShowBankStatistics(void)
     );
 
     printf("Total transactions: %d\n", transactionCount);
+}
+
+void SearchAccount(void)
+{
+    char search[50];
+    int found = 0;
+
+    ReadString("Enter name or surname", search);
+
+    for (int i = 0; i < accountCount; i++)
+    {
+        if (
+            strcmp(accounts[i].name, search) == 0 ||
+            strcmp(accounts[i].surname, search) == 0
+        )
+        {
+            printf(
+                "ID: %d, Name: %s, Surname: %s, Balance: %.2f, Status: %s\n",
+                accounts[i].id,
+                accounts[i].name,
+                accounts[i].surname,
+                accounts[i].balance,
+                accounts[i].status ? "ACTIVE" : "CLOSED"
+            );
+
+            found = 1;
+        }
+    }
+
+    if (!found)
+    {
+        printf("Account not found.\n");
+    }
 }
